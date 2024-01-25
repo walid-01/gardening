@@ -42,6 +42,16 @@ class PlantDatabaseHelper {
     return await db.insert('plants', plant.toMap());
   }
 
+  Future<int> updatePlant(Plant plant) async {
+    Database db = await database;
+    return await db.update(
+      'plants',
+      plant.toMap(),
+      where: 'id = ?',
+      whereArgs: [plant.id],
+    );
+  }
+
   Future<List<Plant>> getPlants() async {
     Database db = await database;
     List<Map<String, dynamic>> maps = await db.query('plants');
@@ -51,38 +61,6 @@ class PlantDatabaseHelper {
   }
 
   Future<void> insertTestPlants() async {
-    List<Plant> testPlants = [
-      Plant(
-        name: 'Jasmine',
-        type: 'Flower',
-        description: 'Best Flower :)',
-        imgURL:
-            'https://hgtvhome.sndimg.com/content/dam/images/hgtv/fullset/2020/4/7/0/shutterstock_kengrx19-1006846339.jpg.rend.hgtvcom.1280.1280.suffix/1586284288104.jpeg',
-        actualName: 'jasmine',
-        datePlanted: DateTime(2023, 5, 15),
-      ),
-      Plant(
-        name: 'Sunflower',
-        type: 'Flowering Plant',
-        description:
-            'Sunflowers are tall, yellow flowers that bloom in the summer.',
-        imgURL: 'https://www.bolster.eu/media/images/5450_dbweb.jpg',
-        actualName: 'sunflower',
-        datePlanted: DateTime(2023, 6, 1),
-      ),
-      Plant(
-        name: 'Snake Plant',
-        type: 'Indoor Plant',
-        description:
-            'Snake plants, or Sansevieria, are popular indoor plants known for their hardiness.',
-        imgURL: 'https://www.bolster.eu/media/images/5450_dbweb.jpg',
-        actualName: 'Sansevieria',
-        datePlanted: DateTime(2023, 7, 10),
-      ),
-    ];
-
-    for (var plant in testPlants) {
-      await insertPlant(plant);
-    }
+    // Your existing code...
   }
 }

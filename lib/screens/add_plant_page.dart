@@ -35,7 +35,7 @@ class _PlantAddPageState extends State<PlantAddPage> {
               },
               child: CircleAvatar(
                 radius: 80,
-                backgroundColor: Colors.lightGreen,
+                backgroundColor: Colors.green[900],
                 backgroundImage: selectedImage != null
                     ? FileImage(File(selectedImage!.path))
                     : null,
@@ -91,7 +91,7 @@ class _PlantAddPageState extends State<PlantAddPage> {
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.resolveWith<Color>(
                   (Set<MaterialState> states) {
-                    return Colors.lightGreen;
+                    return Colors.green[900]!;
                   },
                 ),
                 foregroundColor: MaterialStateProperty.resolveWith<Color>(
@@ -129,6 +129,7 @@ class _PlantAddPageState extends State<PlantAddPage> {
       showErrorMessage('Please fill all fields');
       return;
     }
+    print(selectedImage?.path ?? '');
 
     // Create a new Plant object
     Plant newPlant = Plant(

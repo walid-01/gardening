@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gardening_life/database/plant_database_helper.dart';
 import 'package:gardening_life/models/plant.dart';
 import 'package:gardening_life/screens/add_plant_page.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:gardening_life/screens/plant_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +38,24 @@ class PlantList extends StatefulWidget {
 
 class _PlantListState extends State<PlantList> {
   PlantDatabaseHelper databaseHelper = PlantDatabaseHelper();
+  List<Plant> plants = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the initial list of plants when the widget is created
+    fetchPlants();
+  }
+
+  Future<void> fetchPlants() async {
+    // Fetch the list of plants from the database
+    List<Plant> updatedPlants = await databaseHelper.getPlants();
+
+    // Update the UI with the new list of plants
+    setState(() {
+      plants = updatedPlants;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,18 +66,18 @@ class _PlantListState extends State<PlantList> {
       body: Container(
         padding: const EdgeInsets.all(16.0),
         color: Theme.of(context).colorScheme.background,
-        child: FutureBuilder<List<Plant>>(
-          future: databaseHelper.getPlants(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Text('Press + to add plants.');
-            } else {
-              List<Plant> plants = snapshot.data!;
-              return ListView.builder(
+        child: plants.isEmpty
+            ? Center(
+                child: Text(
+                  'No plant added yet, press + to start adding',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            : ListView.builder(
                 itemCount: plants.length,
                 itemBuilder: (context, index) {
                   return Card(
@@ -84,117 +102,24 @@ class _PlantListState extends State<PlantList> {
                     ),
                   );
                 },
-              );
-            }
-          },
-        ),
+              ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to the screen to add a new plant
-          Navigator.push(
+        onPressed: () async {
+          // Navigate to the add plant page and wait for result
+          await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => PlantAddPage()),
+            MaterialPageRoute(
+              builder: (context) => PlantAddPage(),
+            ),
           );
+
+          // Fetch the updated list of plants when returning from PlantAddPage or EditPlantPage
+          fetchPlants();
         },
-        backgroundColor: Colors.lightGreen,
+        backgroundColor: Colors.green[900],
         child: const Icon(Icons.add),
       ),
     );
-  }
-}
-
-class PlantPage extends StatelessWidget {
-  final Plant plant;
-
-  const PlantPage({Key? key, required this.plant}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(plant.name),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(16.0),
-        color: Theme.of(context).colorScheme.background,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Plant Image
-              Container(
-                height: 200.0,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.0),
-                  image: DecorationImage(
-                    image: NetworkImage(plant.imgURL),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                'Actual Name: ${plant.actualName}',
-                style: TextStyle(fontSize: 16.0),
-              ),
-              SizedBox(height: 8.0),
-              // Plant Details
-              Text(
-                'Type: ${plant.type}',
-                style: TextStyle(fontSize: 16.0),
-              ),
-              SizedBox(height: 8.0),
-              Text(
-                'Description: ${plant.description}',
-                style: TextStyle(fontSize: 16.0),
-              ),
-
-              // Date Planted
-              SizedBox(height: 8.0),
-              Text(
-                'Date Planted: ${_formatDate(plant.datePlanted)}',
-                style: TextStyle(fontSize: 16.0),
-              ),
-
-              SizedBox(height: 8.0),
-
-              // Wikipedia Link Button
-              GestureDetector(
-                onTap: () {
-                  _launchWikipediaSearch(plant.actualName);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.lightGreen,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Wikipedia Search',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    // Format the date as needed
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  Future<void> _launchWikipediaSearch(String query) async {
-    final searchUrl = 'https://en.wikipedia.org/w/index.php?search=$query';
-    if (await canLaunch(searchUrl)) {
-      await launch(searchUrl);
-    } else {
-      throw 'Could not launch $searchUrl';
-    }
   }
 }

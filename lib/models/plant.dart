@@ -1,4 +1,5 @@
 class Plant {
+  int? id;
   late String name;
   late String type;
   late String description;
@@ -7,6 +8,7 @@ class Plant {
   late DateTime datePlanted;
 
   Plant({
+    this.id, // Accept nullable id in the constructor
     required this.name,
     required this.type,
     required this.description,
@@ -17,26 +19,23 @@ class Plant {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'name': name,
       'type': type,
       'description': description,
       'imgURL': imgURL,
       'actualName': actualName,
-      'datePlanted': datePlanted
-          .toLocal()
-          .toString()
-          .split(' ')[0], // Extracting only the date part as a string
+      'datePlanted': datePlanted.toLocal().toString().split(' ')[0],
     };
   }
 
   Plant.fromMap(Map<String, dynamic> map) {
+    id = map['id'] as int?;
     name = map['name']!;
     type = map['type']!;
     description = map['description']!;
     imgURL = map['imgURL']!;
     actualName = map['actualName']!;
-
-    // Parse the date from the string to a DateTime object
     datePlanted = DateTime.parse(map['datePlanted']!);
   }
 }
