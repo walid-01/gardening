@@ -7,9 +7,6 @@ import 'package:gardening_life/screens/plant_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // PlantDatabaseHelper databaseHelper = PlantDatabaseHelper();
-  // await databaseHelper.insertTestPlants();
-
   runApp(const MainApp());
 }
 

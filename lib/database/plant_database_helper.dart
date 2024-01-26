@@ -59,8 +59,4 @@ class PlantDatabaseHelper {
       return Plant.fromMap(maps[index]);
     });
   }
-
-  Future<void> insertTestPlants() async {
-    // Your existing code...
-  }
 }
