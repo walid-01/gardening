@@ -66,13 +66,20 @@ class _PlantAddPageState extends State<PlantAddPage> {
               },
             ),
             const SizedBox(height: 10.0),
-            TextField(
-              controller: typeController,
-              decoration: InputDecoration(labelText: 'Plant Type'),
-              // Make the field required
-              onChanged: (value) {
-                setState(() {});
+            DropdownButtonFormField<String>(
+              value: typeController.text.isEmpty ? null : typeController.text,
+              onChanged: (String? value) {
+                setState(() {
+                  typeController.text = value ?? '';
+                });
               },
+              items: ["Flower", "Vegetable", "Fruit"].map((String type) {
+                return DropdownMenuItem<String>(
+                  value: type,
+                  child: Text(type),
+                );
+              }).toList(),
+              decoration: InputDecoration(labelText: 'Plant Type'),
             ),
             const SizedBox(height: 10.0),
             TextField(

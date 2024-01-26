@@ -6,12 +6,11 @@ import 'package:gardening_life/screens/plant_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  const MainApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,22 +35,34 @@ class PlantList extends StatefulWidget {
 class _PlantListState extends State<PlantList> {
   PlantDatabaseHelper databaseHelper = PlantDatabaseHelper();
   List<Plant> plants = [];
+  String selectedCategory = 'All'; // Initial category
 
-  @override
-  void initState() {
-    super.initState();
-
-    // Fetch the initial list of plants when the widget is created
-    fetchPlants();
+  Future<void> updateFilteredPlants(String category) async {
+    List<Plant> filteredPlants;
+    switch (category) {
+      case 'Flower':
+        filteredPlants = await databaseHelper.getFlowerPlants();
+        break;
+      case 'Vegetable':
+        filteredPlants = await databaseHelper.getVegetablePlants();
+        break;
+      case 'Fruit':
+        filteredPlants = await databaseHelper.getFruitPlants();
+        break;
+      default:
+        filteredPlants = await databaseHelper.getPlants();
+    }
+    setState(() {
+      plants = filteredPlants;
+      selectedCategory = category;
+    });
   }
 
-  Future<void> fetchPlants() async {
-    // Fetch the list of plants from the database
+  Future<void> UpdatePlantList() async {
     List<Plant> updatedPlants = await databaseHelper.getPlants();
-
-    // Update the UI with the new list of plants
     setState(() {
       plants = updatedPlants;
+      selectedCategory = 'All';
     });
   }
 
@@ -92,8 +103,9 @@ class _PlantListState extends State<PlantList> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                PlantPage(plant: plants[index]),
+                            builder: (context) => PlantPage(
+                                plant: plants[index],
+                                callback: UpdatePlantList),
                           ),
                         );
                       },
@@ -113,10 +125,60 @@ class _PlantListState extends State<PlantList> {
           );
 
           // Fetch the updated list of plants when returning from PlantAddPage or EditPlantPage
-          fetchPlants();
+          UpdatePlantList();
         },
         backgroundColor: Colors.green[900],
         child: const Icon(Icons.add),
+      ),
+      // Bottom Navigation Bar
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon:
+                Image.asset('assets/icons/infinity.png', width: 24, height: 24),
+            label: 'All',
+          ),
+          BottomNavigationBarItem(
+            icon:
+                Image.asset('assets/icons/jasmine.png', width: 24, height: 24),
+            label: 'Flowers',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/icons/vegetables.png',
+                width: 24, height: 24),
+            label: 'Vegetables',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/icons/fruits.png', width: 24, height: 24),
+            label: 'Fruits',
+          ),
+        ],
+        currentIndex: selectedCategory == 'All'
+            ? 0
+            : selectedCategory == 'Flower'
+                ? 1
+                : selectedCategory == 'Vegetable'
+                    ? 2
+                    : 3,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.black,
+        onTap: (index) {
+          // Update filtered plants based on the selected category
+          switch (index) {
+            case 0:
+              updateFilteredPlants('All');
+              break;
+            case 1:
+              updateFilteredPlants('Flower');
+              break;
+            case 2:
+              updateFilteredPlants('Vegetable');
+              break;
+            case 3:
+              updateFilteredPlants('Fruit');
+              break;
+          }
+        },
       ),
     );
   }

@@ -68,4 +68,40 @@ class PlantDatabaseHelper {
       whereArgs: [plantId],
     );
   }
+
+  Future<List<Plant>> getFlowerPlants() async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      'plants',
+      where: 'type = ?',
+      whereArgs: ['Flower'],
+    );
+    return List.generate(maps.length, (index) {
+      return Plant.fromMap(maps[index]);
+    });
+  }
+
+  Future<List<Plant>> getVegetablePlants() async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      'plants',
+      where: 'type = ?',
+      whereArgs: ['Vegetable'],
+    );
+    return List.generate(maps.length, (index) {
+      return Plant.fromMap(maps[index]);
+    });
+  }
+
+  Future<List<Plant>> getFruitPlants() async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      'plants',
+      where: 'type = ?',
+      whereArgs: ['Fruit'],
+    );
+    return List.generate(maps.length, (index) {
+      return Plant.fromMap(maps[index]);
+    });
+  }
 }

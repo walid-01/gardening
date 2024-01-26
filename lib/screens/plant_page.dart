@@ -6,16 +6,30 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:gardening_life/models/plant.dart';
 
-class PlantPage extends StatelessWidget {
-  final Plant plant;
+// ignore: must_be_immutable
+class PlantPage extends StatefulWidget {
+  Plant plant;
+  final Function callback;
 
-  const PlantPage({Key? key, required this.plant}) : super(key: key);
+  PlantPage({Key? key, required this.plant, required this.callback})
+      : super(key: key);
+
+  @override
+  State<PlantPage> createState() => _PlantPageState();
+}
+
+class _PlantPageState extends State<PlantPage> {
+  void updatePlant(Plant plant) {
+    setState(() {
+      widget.plant = plant;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(plant.name),
+        title: Text(widget.plant.name),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -23,7 +37,11 @@ class PlantPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditPlantPage(plant: plant),
+                  builder: (context) => EditPlantPage(
+                    plant: widget.plant,
+                    updateMainFrame: widget.callback,
+                    updateEditFrame: updatePlant,
+                  ),
                 ),
               );
             },
@@ -50,29 +68,30 @@ class PlantPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12.0),
                   image: DecorationImage(
-                    image: _getImageProvider(plant.imgURL),
+                    image: _getImageProvider(widget.plant.imgURL),
                     fit: BoxFit.contain,
                   ),
                 ),
               ),
               // Plant Details
               const SizedBox(height: 16.0),
-              _buildAttributeRow('Actual Name:', plant.actualName),
+              _buildAttributeRow('Actual Name:', widget.plant.actualName),
               const SizedBox(height: 8.0),
-              _buildAttributeRow('Type:', plant.type),
+              _buildAttributeRow('Type:', widget.plant.type),
               const SizedBox(height: 8.0),
-              _buildAttributeRow('Description:', plant.description),
+              _buildAttributeRow('Description:', widget.plant.description),
 
               // Date Added
               const SizedBox(height: 8.0),
-              _buildAttributeRow('Date Added:', _formatDate(plant.datePlanted)),
+              _buildAttributeRow(
+                  'Date Added:', _formatDate(widget.plant.datePlanted)),
 
               const SizedBox(height: 16.0),
 
               // Wikipedia Link Button
               GestureDetector(
                 onTap: () {
-                  _launchWikipediaSearch(plant.actualName);
+                  _launchWikipediaSearch(widget.plant.actualName);
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -180,8 +199,8 @@ class PlantPage extends StatelessWidget {
 
   void _deletePlant(BuildContext context) async {
     // Perform the delete operation in the database
-    await PlantDatabaseHelper().deletePlant(plant.id);
-
+    await PlantDatabaseHelper().deletePlant(widget.plant.id);
+    this.widget.callback();
     // Navigate back to the home page by popping until reaching the root
     Navigator.popUntil(context, (route) => route.isFirst);
   }
