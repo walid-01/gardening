@@ -59,4 +59,13 @@ class PlantDatabaseHelper {
       return Plant.fromMap(maps[index]);
     });
   }
+
+  Future<int> deletePlant(int? plantId) async {
+    Database db = await database;
+    return await db.delete(
+      'plants',
+      where: 'id = ?',
+      whereArgs: [plantId],
+    );
+  }
 }

@@ -40,6 +40,7 @@ class _PlantListState extends State<PlantList> {
   @override
   void initState() {
     super.initState();
+
     // Fetch the initial list of plants when the widget is created
     fetchPlants();
   }

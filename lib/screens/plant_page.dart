@@ -1,5 +1,6 @@
 // plant_page.dart
 import 'package:flutter/material.dart';
+import 'package:gardening_life/database/plant_database_helper.dart';
 import 'package:gardening_life/screens/edit_plant_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
@@ -27,6 +28,12 @@ class PlantPage extends StatelessWidget {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              _showDeleteConfirmation(context);
+            },
+          ),
         ],
       ),
       body: Container(
@@ -48,10 +55,10 @@ class PlantPage extends StatelessWidget {
                   ),
                 ),
               ),
+              // Plant Details
               const SizedBox(height: 16.0),
               _buildAttributeRow('Actual Name:', plant.actualName),
               const SizedBox(height: 8.0),
-              // Plant Details
               _buildAttributeRow('Type:', plant.type),
               const SizedBox(height: 8.0),
               _buildAttributeRow('Description:', plant.description),
@@ -140,5 +147,42 @@ class PlantPage extends StatelessWidget {
       // Placeholder image when imgURL is empty
       return const AssetImage('assets/plant_placeholder.png');
     }
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Plant'),
+          content: const Text('Are you sure you want to delete this plant?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deletePlant(context);
+              },
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deletePlant(BuildContext context) async {
+    // Perform the delete operation in the database
+    await PlantDatabaseHelper().deletePlant(plant.id);
+
+    // Navigate back to the home page by popping until reaching the root
+    Navigator.popUntil(context, (route) => route.isFirst);
   }
 }
