@@ -35,6 +35,7 @@ class PlantList extends StatefulWidget {
 class _PlantListState extends State<PlantList> {
   PlantDatabaseHelper databaseHelper = PlantDatabaseHelper();
   List<Plant> plants = [];
+  List<Plant> filteredPlants = [];
   String selectedCategory = 'All'; // Initial category
 
   Future<void> updateFilteredPlants(String category) async {
@@ -71,12 +72,23 @@ class _PlantListState extends State<PlantList> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gardening Life'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: PlantSearchDelegate(plants),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
         color: Theme.of(context).colorScheme.background,
         child: plants.isEmpty
-            ? Center(
+            ? const Center(
                 child: Text(
                   'No plant added yet, press + to start adding',
                   textAlign: TextAlign.center,
@@ -104,8 +116,9 @@ class _PlantListState extends State<PlantList> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => PlantPage(
-                                plant: plants[index],
-                                callback: UpdatePlantList),
+                              plant: plants[index],
+                              callback: UpdatePlantList,
+                            ),
                           ),
                         );
                       },
@@ -180,6 +193,78 @@ class _PlantListState extends State<PlantList> {
           }
         },
       ),
+    );
+  }
+}
+
+class PlantSearchDelegate extends SearchDelegate<String> {
+  final List<Plant> plants;
+
+  PlantSearchDelegate(this.plants);
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, '');
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // Filter plants based on the search query
+    final filteredPlants = plants
+        .where(
+            (plant) => plant.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+
+    return _buildSearchResults(filteredPlants);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // Suggestions are not implemented in this example
+    return Container();
+  }
+
+  Widget _buildSearchResults(List<Plant> searchResults) {
+    return ListView.builder(
+      itemCount: searchResults.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(searchResults[index].name),
+          subtitle: Text(searchResults[index].type),
+          onTap: () {
+            // Handle tap on search result
+            // For example, navigate to PlantPage
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PlantPage(
+                  plant: searchResults[index],
+                  callback: () {
+                    // UpdatePlantList() or any other callback
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
