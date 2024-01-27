@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:gardening_life/database/plant_database_helper.dart';
 import 'package:gardening_life/models/plant.dart';
@@ -36,7 +38,7 @@ class _PlantListState extends State<PlantList> {
   PlantDatabaseHelper databaseHelper = PlantDatabaseHelper();
   List<Plant> plants = [];
   List<Plant> filteredPlants = [];
-  String selectedCategory = 'All'; // Initial category
+  String selectedCategory = 'All';
 
   Future<void> updateFilteredPlants(String category) async {
     List<Plant> filteredPlants;
@@ -90,7 +92,7 @@ class _PlantListState extends State<PlantList> {
         child: plants.isEmpty
             ? const Center(
                 child: Text(
-                  'No plant added yet, press + to start adding',
+                  'Nothing to show here, press + to start adding',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18.0,
@@ -102,13 +104,13 @@ class _PlantListState extends State<PlantList> {
                 itemCount: plants.length,
                 itemBuilder: (context, index) {
                   return Card(
-                    color: Colors.green[50],
                     elevation: 3,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
+                      leading: _buildPlantImage(plants[index].imgURL),
                       title: Text(plants[index].name),
                       subtitle: Text(plants[index].type),
                       onTap: () {
@@ -194,6 +196,35 @@ class _PlantListState extends State<PlantList> {
         },
       ),
     );
+  }
+
+  Widget _buildPlantImage(String imgURL) {
+    if (imgURL.isNotEmpty) {
+      if (imgURL.startsWith('http')) {
+        // If imgURL starts with 'http', treat it as a network image
+        return Image.network(
+          imgURL,
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+        );
+      } else {
+        // If imgURL is a local path, treat it as a file
+        return Image.file(
+          File(imgURL),
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+        );
+      }
+    } else {
+      return Image.asset(
+        'assets/plant_placeholder.png',
+        width: 48,
+        height: 48,
+        fit: BoxFit.cover,
+      );
+    }
   }
 }
 
